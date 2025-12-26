@@ -1,10 +1,4 @@
 ﻿using FluentNHibernate.Mapping;
-using NHibernate.Id;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TechnicalAssestmentMSA.Domain.Entidades;
 
 namespace TechnicalAssestmentMSA.Infrastructure.Persistence.Mappings
@@ -16,11 +10,17 @@ namespace TechnicalAssestmentMSA.Infrastructure.Persistence.Mappings
             Table("clientes");
 
             Id(x => x.Id)
-                .GeneratedBy.Guid();
+                .GeneratedBy.Assigned();
 
             Map(x => x.NomeFantasia).Not.Nullable().Length(200);
-            Map(x => x.Cnpj).Not.Nullable().Length(14);
-            Map(x => x.Ativo).Not.Nullable().CustomType<Boolean>();
+            Component(x => x.Cnpj, c =>
+            {
+                c.Map(x => x.Valor)
+                 .Column("cnpj")
+                 .Not.Nullable()
+                 .Length(14);
+            });
+            Map(x => x.Ativo).Not.Nullable();
         }
     }
 }

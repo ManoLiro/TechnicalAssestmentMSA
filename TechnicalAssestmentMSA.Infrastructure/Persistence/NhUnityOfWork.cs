@@ -1,0 +1,23 @@
+﻿using NHibernate;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TechnicalAssestmentMSA.Infrastructure.Persistence
+{
+    public sealed class NhUnityOfWork
+    {
+        private readonly ITransaction _transacao;
+
+        public NhUnityOfWork(ITransaction transacao)
+            => _transacao = transacao;
+
+        public Task CommitAsync(CancellationToken ct = default)
+        {
+            _transacao.Commit();
+            return Task.CompletedTask;
+        }
+    }
+}

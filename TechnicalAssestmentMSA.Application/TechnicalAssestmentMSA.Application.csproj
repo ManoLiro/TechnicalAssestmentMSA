@@ -10,8 +10,4 @@
     <ProjectReference Include="..\TechnicalAssestmentMSA.Domain\TechnicalAssestmentMSA.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Repositories\" />
-  </ItemGroup>
-
 </Project>
