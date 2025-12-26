@@ -17,7 +17,6 @@ namespace TechnicalAssestmentMSA.Infrastructure.Repositories
 
         public async Task<bool> ExisteCnpjAsync(string cnpj, CancellationToken ct = default)
         {
-            // HQL navegando no componente: c.Cnpj.Valor
             var qtd = await _session.CreateQuery("select count(1) from Cliente c where c.Cnpj.Valor = :cnpj")
                 .SetParameter("cnpj", cnpj)
                 .UniqueResultAsync<long>(ct);

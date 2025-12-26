@@ -1,4 +1,6 @@
-﻿namespace TechnicalAssestmentMSA.Application.Clientes.Commands
+﻿using MediatR;
+
+namespace TechnicalAssestmentMSA.Application.Clientes.Commands
 {
-    public sealed record CriaClienteCommand(string NomeFantasia, string Cnpj, bool Ativo);
+    public sealed record CriaClienteCommand(string NomeFantasia, string Cnpj, bool Ativo) : IRequest<Guid>;
 }

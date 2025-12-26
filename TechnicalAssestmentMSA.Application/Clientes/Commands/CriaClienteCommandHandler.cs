@@ -1,21 +1,22 @@
-﻿using TechnicalAssestmentMSA.Application.Repositories;
+﻿using MediatR;
+using TechnicalAssestmentMSA.Application.Repositories;
 using TechnicalAssestmentMSA.Domain.Entidades;
 using TechnicalAssestmentMSA.Domain.ValueObjects;
 
 namespace TechnicalAssestmentMSA.Application.Clientes.Commands
 {
-    public sealed class CriaClienteCommandHandler
+    public sealed class CriaClienteCommandHandler : IRequestHandler<CriaClienteCommand, Guid>
     {
         private readonly IClienteRepository _repositorio;
-        private readonly IUnidadeDeTrabalho _uow;
+        private readonly IUnityOfWorkRepository _uow;
 
-        public CriaClienteCommandHandler(IClienteRepository repositorio, IUnidadeDeTrabalho uow)
+        public CriaClienteCommandHandler(IClienteRepository repositorio, IUnityOfWorkRepository uow)
         {
             _repositorio = repositorio;
             _uow = uow;
         }
 
-        public async Task<Guid> HandleAsync(CriaClienteCommand comando, CancellationToken ct = default)
+        public async Task<Guid> Handle(CriaClienteCommand comando, CancellationToken ct)
         {
             Cnpj cnpj;
             try

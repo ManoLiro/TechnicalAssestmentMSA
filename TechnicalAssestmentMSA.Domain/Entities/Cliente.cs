@@ -4,12 +4,12 @@ namespace TechnicalAssestmentMSA.Domain.Entidades
 {
     public class Cliente
     {
-        public Guid Id { get; private set; }
-        public string NomeFantasia { get; private set; } = default!;
-        public Cnpj Cnpj { get; private set; } = default!;
-        public bool Ativo { get; private set; }
+        public virtual Guid Id { get; protected set; }
+        public virtual string NomeFantasia { get; protected set; } = default!;
+        public virtual Cnpj Cnpj { get; protected set; } = default!;
+        public virtual bool Ativo { get; protected set; }
 
-        private Cliente() { } // NHibernate
+        protected Cliente() { } // NHibernate proxy
 
         public Cliente(Guid id, string nomeFantasia, Cnpj cnpj, bool ativo = true)
         {
@@ -23,7 +23,7 @@ namespace TechnicalAssestmentMSA.Domain.Entidades
             Ativo = ativo;
         }
 
-        public void AlterarNomeFantasia(string nomeFantasia)
+        public virtual void AlterarNomeFantasia(string nomeFantasia)
         {
             if (string.IsNullOrWhiteSpace(nomeFantasia))
                 throw new Exception("Nome fantasia é obrigatório.");
@@ -31,8 +31,7 @@ namespace TechnicalAssestmentMSA.Domain.Entidades
             NomeFantasia = nomeFantasia.Trim();
         }
 
-        public void Ativar() => Ativo = true;
-        public void Desativar() => Ativo = false;
-
+        public virtual void Ativar() => Ativo = true;
+        public virtual void Desativar() => Ativo = false;
     }
 }

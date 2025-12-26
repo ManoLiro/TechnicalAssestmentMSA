@@ -2,9 +2,9 @@
 
 namespace TechnicalAssestmentMSA.Domain.ValueObjects
 {
-    public sealed record Cnpj
+    public record Cnpj
     {
-        public string Valor { get; init; }
+        public virtual string Valor { get; init; }
 
         private static readonly Regex RegexCnpj =
             new(@"^[A-Z0-9]{12}\d{2}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -18,6 +18,12 @@ namespace TechnicalAssestmentMSA.Domain.ValueObjects
                 throw new ArgumentException("CNPJ inválido.", nameof(valor));
 
             return cnpj;
+        }
+
+        // Necessário para o NHibernate (instanciação via reflexão/proxy)
+        protected Cnpj()
+        {
+            Valor = string.Empty;
         }
 
         private Cnpj(string valorSanitizado)

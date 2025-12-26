@@ -1,13 +1,9 @@
 ﻿using NHibernate;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TechnicalAssestmentMSA.Application.Repositories;
 
 namespace TechnicalAssestmentMSA.Infrastructure.Persistence
 {
-    public sealed class NhUnityOfWork
+    public sealed class NhUnityOfWork : IUnityOfWorkRepository
     {
         private readonly ITransaction _transacao;
 

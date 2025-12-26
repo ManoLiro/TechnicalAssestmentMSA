@@ -1,6 +1,6 @@
 ﻿namespace TechnicalAssestmentMSA.Application.Repositories
 {
-    public interface IUnidadeDeTrabalho
+    public interface IUnityOfWorkRepository
     {
         Task CommitAsync(CancellationToken ct = default);
     }

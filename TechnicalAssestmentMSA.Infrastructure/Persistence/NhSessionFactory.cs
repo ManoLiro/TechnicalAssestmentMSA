@@ -1,33 +1,44 @@
 ﻿using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
+using Microsoft.Extensions.DependencyInjection;
+using NHibernate.Tool.hbm2ddl;
+using TechnicalAssestmentMSA.Application.Repositories;
+using TechnicalAssestmentMSA.Infrastructure.Repositories;
 using NHibernate;
-using NHibernate.Cfg;
-using TechnicalAssestmentMSA.Infrastructure.Persistence.Mappings;
 
 namespace TechnicalAssestmentMSA.Infrastructure.Persistence
 {
-    public sealed class NhSessionFactory
+    public static class NhSessionFactory
     {
-        public ISessionFactory SessionFactory { get; }
-        public Configuration Configuracao { get; }
-
-        public NhSessionFactory(string caminhoDoArquivoDb)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
-            Configuration? cfgCapturada = null;
-
-            SessionFactory = Fluently.Configure()
-                .Database(
-                    SQLiteConfiguration.Standard
-                        .UsingFile(caminhoDoArquivoDb)
-                        .ShowSql()
-                )
-                .Mappings(m =>
-                    m.FluentMappings.AddFromAssemblyOf<ClienteMap>())
-                .ExposeConfiguration(cfg => cfgCapturada = cfg)
+            // 1. Configurar NHibernate com SQLite
+            var sessionFactory = Fluently.Configure()
+                .Database(SQLiteConfiguration.Standard
+                    .UsingFile("meubanco.db")) // Define o arquivo
+                .Mappings(m => m.FluentMappings.AddFromAssemblyOf<ClienteRepository>())
+                .ExposeConfiguration(cfg =>
+                {
+                    // CRÍTICO: Isso cria as tabelas se não existirem (apenas para dev/exemplo)
+                    new SchemaUpdate(cfg).Execute(false, true);
+                })
                 .BuildSessionFactory();
 
-            Configuracao = cfgCapturada
-                ?? throw new InvalidOperationException("Configuration do NHibernate não capturada.");
+            // 2. Registrar Singleton do Factory
+            services.AddSingleton(sessionFactory);
+
+            // 3. Registrar Scoped da Sessão (uma por requisição HTTP)
+            services.AddScoped<ISession>(provider =>
+                provider.GetRequiredService<ISessionFactory>().OpenSession());
+
+            // 3.1 Registrar transação por request (UoW)
+            services.AddScoped<ITransaction>(sp => sp.GetRequiredService<ISession>().BeginTransaction());
+            services.AddScoped<IUnityOfWorkRepository, NhUnityOfWork>();
+
+            // 4. Registrar Repositórios
+            services.AddScoped<IClienteRepository, ClienteRepository>();
+
+            return services;
         }
     }
 }
