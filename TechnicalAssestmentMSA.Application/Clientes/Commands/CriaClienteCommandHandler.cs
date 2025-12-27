@@ -8,9 +8,9 @@ namespace TechnicalAssestmentMSA.Application.Clientes.Commands
     public sealed class CriaClienteCommandHandler : IRequestHandler<CriaClienteCommand, Guid>
     {
         private readonly IClienteRepository _repositorio;
-        private readonly IUnityOfWorkRepository _uow;
+        private readonly IUnitOfWorkRepository _uow;
 
-        public CriaClienteCommandHandler(IClienteRepository repositorio, IUnityOfWorkRepository uow)
+        public CriaClienteCommandHandler(IClienteRepository repositorio, IUnitOfWorkRepository uow)
         {
             _repositorio = repositorio;
             _uow = uow;

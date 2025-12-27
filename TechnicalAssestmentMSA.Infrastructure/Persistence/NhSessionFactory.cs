@@ -33,7 +33,7 @@ namespace TechnicalAssestmentMSA.Infrastructure.Persistence
 
             // 3.1 Registrar transação por request (UoW)
             services.AddScoped<ITransaction>(sp => sp.GetRequiredService<ISession>().BeginTransaction());
-            services.AddScoped<IUnityOfWorkRepository, NhUnityOfWork>();
+            services.AddScoped<IUnitOfWorkRepository, NhUnitOfWork>();
 
             // 4. Registrar Repositórios
             services.AddScoped<IClienteRepository, ClienteRepository>();

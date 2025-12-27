@@ -28,7 +28,7 @@ namespace TechnicalAssestmentMSA.API.Controllers
             {
                 var comando = new CriaClienteCommand(request.NomeFantasia, request.Cnpj, request.Ativo);
                 var resultado = await _mediator.Send(comando, ct);
-                return Ok(resultado);
+                return CreatedAtAction(nameof(GetPorId), new { id = resultado }, new { id = resultado });
             }
             catch (Exception ex)
             {
@@ -36,7 +36,7 @@ namespace TechnicalAssestmentMSA.API.Controllers
             }           
         }
 
-        /// <summary>Obtém um cliente por Id.</summary>
+        /// <summary>Obtï¿½m um cliente por Id.</summary>
         [HttpGet("{id:guid}")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

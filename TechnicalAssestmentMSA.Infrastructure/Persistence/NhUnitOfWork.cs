@@ -3,11 +3,11 @@ using TechnicalAssestmentMSA.Application.Repositories;
 
 namespace TechnicalAssestmentMSA.Infrastructure.Persistence
 {
-    public sealed class NhUnityOfWork : IUnityOfWorkRepository
+    public sealed class NhUnitOfWork : IUnitOfWorkRepository
     {
         private readonly ITransaction _transacao;
 
-        public NhUnityOfWork(ITransaction transacao)
+        public NhUnitOfWork(ITransaction transacao)
             => _transacao = transacao;
 
         public Task CommitAsync(CancellationToken ct = default)

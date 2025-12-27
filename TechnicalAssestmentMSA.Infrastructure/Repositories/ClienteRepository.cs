@@ -1,4 +1,5 @@
 ﻿using NHibernate;
+using NHibernate.Linq;
 using TechnicalAssestmentMSA.Application.Repositories;
 using TechnicalAssestmentMSA.Domain.Entidades;
 
@@ -12,21 +13,18 @@ namespace TechnicalAssestmentMSA.Infrastructure.Repositories
             => _session = session;
         public Task AdicionarAsync(Cliente cliente, CancellationToken ct = default)
         {
-           return _session.SaveAsync(cliente);
+            return _session.SaveAsync(cliente);
         }
 
         public async Task<bool> ExisteCnpjAsync(string cnpj, CancellationToken ct = default)
         {
-            var qtd = await _session.CreateQuery("select count(1) from Cliente c where c.Cnpj.Valor = :cnpj")
-                .SetParameter("cnpj", cnpj)
-                .UniqueResultAsync<long>(ct);
-
-            return qtd > 0;
+            return await _session.Query<Cliente>()
+              .AnyAsync(c => c.Cnpj.Valor == cnpj, ct);
         }
 
         public Task<Cliente?> ObterPorIdAsync(Guid id, CancellationToken ct = default)
         {
-           return _session.GetAsync<Cliente?>(id, ct);
+            return _session.GetAsync<Cliente?>(id, ct);
         }
     }
 }
