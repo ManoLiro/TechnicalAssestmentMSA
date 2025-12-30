@@ -18,7 +18,7 @@ namespace TechnicalAssestmentMSA.Infrastructure.Persistence
             .Mappings(m => m.FluentMappings.AddFromAssemblyOf<ClienteRepository>())
             .ExposeConfiguration(cfg =>
             {
-                new SchemaUpdate(cfg).Execute(false, true);
+                new SchemaExport(cfg).Create(false, true);
             })
             .BuildSessionFactory();
 
