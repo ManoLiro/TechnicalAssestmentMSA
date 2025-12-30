@@ -26,7 +26,7 @@ O projeto está estruturado em 4 camadas principais:
 - **SQLite** (banco de dados em memória)
 - **xUnit** (framework de testes)
 - **Moq** (biblioteca de mocking)
-- **Swagger/OpenAPI** (documentação da API)
+- **Scalar/OpenAPI** (documentação da API)
 
 ## 📋 Funcionalidades
 
