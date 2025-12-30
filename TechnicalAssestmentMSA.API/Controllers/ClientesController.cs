@@ -24,19 +24,12 @@ namespace TechnicalAssestmentMSA.API.Controllers
         [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Post([FromBody] CriarClienteRequest request, CancellationToken ct)
         {
-            try
-            {
-                var comando = new CriaClienteCommand(request.NomeFantasia, request.Cnpj, request.Ativo);
-                var resultado = await _mediator.Send(comando, ct);
-                return CreatedAtAction(nameof(GetPorId), new { id = resultado }, new { id = resultado });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { erro = ex.Message });
-            }           
+            var comando = new CriaClienteCommand(request.NomeFantasia, request.Cnpj, request.Ativo);
+            var resultado = await _mediator.Send(comando, ct);
+            return CreatedAtAction(nameof(GetPorId), new { id = resultado }, new { id = resultado });
         }
 
-        /// <summary>Obt�m um cliente por Id.</summary>
+        /// <summary>Obtém um cliente por Id.</summary>
         [HttpGet("{id:guid}")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

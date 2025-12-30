@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Logging;
 using Moq;
+using TechnicalAssestmentMSA.Application.Clientes.Commands;
 using TechnicalAssestmentMSA.Application.Clientes.Queries;
 using TechnicalAssestmentMSA.Application.Repositories;
 using TechnicalAssestmentMSA.Domain.Entidades;
@@ -10,11 +12,13 @@ namespace TechnicalAssestmentMSA.Teste.Clientes.Queries
     {
         private readonly Mock<IClienteRepository> _repositorioMock;
         private readonly ObtemClientePorIdQueryHandler _handler;
+        private readonly Mock<ILogger<ObtemClientePorIdQueryHandler>> _loggerMock;
 
         public ObtemClientePorIdQueryHandlerTests()
         {
             _repositorioMock = new Mock<IClienteRepository>();
-            _handler = new ObtemClientePorIdQueryHandler(_repositorioMock.Object);
+            _loggerMock = new Mock<ILogger<ObtemClientePorIdQueryHandler>>();
+            _handler = new ObtemClientePorIdQueryHandler(_repositorioMock.Object, _loggerMock.Object);
         }
 
         [Fact]
@@ -37,7 +41,7 @@ namespace TechnicalAssestmentMSA.Teste.Clientes.Queries
             Assert.NotNull(resultado);
             Assert.Equal(clienteId, resultado.Id);
             Assert.Equal("Empresa Teste Ltda", resultado.NomeFantasia);
-            Assert.Equal(cnpj.Valor, resultado.Cnpj.Valor);
+            Assert.Equal(cnpj.Valor, resultado.Cnpj);
             Assert.True(resultado.Ativo);
             _repositorioMock.Verify(r => r.ObterPorIdAsync(clienteId, It.IsAny<CancellationToken>()), Times.Once);
         }

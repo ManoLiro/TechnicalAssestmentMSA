@@ -1,12 +1,20 @@
+using Scalar.AspNetCore;
 using TechnicalAssestmentMSA.Application.Clientes.Commands;
 using TechnicalAssestmentMSA.Application.Clientes.Queries;
 using TechnicalAssestmentMSA.Infrastructure.Persistence;
+using TechnicalAssestmentMSA.API.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using TechnicalAssestmentMSA.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure();
 
 builder.Services.AddControllers();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CriarClienteRequestValidator>();
 
 // MediatR
 builder.Services.AddMediatR(cfg =>
@@ -28,12 +36,26 @@ builder.Services.AddSwaggerGen(o =>
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("Technical Assestment MSA API")
+               .WithTheme(ScalarTheme.Moon)
+               .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
+               .AddDocument("v1");
+    });
+
+    app.MapGet("/", context =>
+    {
+        context.Response.Redirect("/scalar");
+        return Task.CompletedTask;
+    });
+}
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

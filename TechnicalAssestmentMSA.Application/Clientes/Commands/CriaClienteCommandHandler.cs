@@ -1,50 +1,66 @@
 ﻿using MediatR;
 using TechnicalAssestmentMSA.Application.Repositories;
 using TechnicalAssestmentMSA.Domain.Entidades;
+using TechnicalAssestmentMSA.Domain.Exceptions;
 using TechnicalAssestmentMSA.Domain.ValueObjects;
+using Microsoft.Extensions.Logging;
 
-namespace TechnicalAssestmentMSA.Application.Clientes.Commands
+namespace TechnicalAssestmentMSA.Application.Clientes.Commands;
+
+public sealed class CriaClienteCommandHandler : IRequestHandler<CriaClienteCommand, Guid>
 {
-    public sealed class CriaClienteCommandHandler : IRequestHandler<CriaClienteCommand, Guid>
+    private readonly IClienteRepository _repositorio;
+    private readonly IUnitOfWorkRepository _uow;
+    private readonly ILogger<CriaClienteCommandHandler> _logger;
+
+    public CriaClienteCommandHandler(
+        IClienteRepository repositorio, 
+        IUnitOfWorkRepository uow,
+        ILogger<CriaClienteCommandHandler> logger)
     {
-        private readonly IClienteRepository _repositorio;
-        private readonly IUnitOfWorkRepository _uow;
+        _repositorio = repositorio;
+        _uow = uow;
+        _logger = logger;
+    }
 
-        public CriaClienteCommandHandler(IClienteRepository repositorio, IUnitOfWorkRepository uow)
+    public async Task<Guid> Handle(CriaClienteCommand comando, CancellationToken ct)
+    {
+        _logger.LogInformation(
+            "Iniciando criação de cliente. NomeFantasia: {NomeFantasia}, CNPJ: {Cnpj}", 
+            comando.NomeFantasia, 
+            comando.Cnpj);
+
+        Cnpj cnpj;
+        try
         {
-            _repositorio = repositorio;
-            _uow = uow;
+            cnpj = Cnpj.Criar(comando.Cnpj);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "CNPJ inválido fornecido: {Cnpj}", comando.Cnpj);
+            throw new CnpjInvalidoException(comando.Cnpj, ex);
         }
 
-        public async Task<Guid> Handle(CriaClienteCommand comando, CancellationToken ct)
+        if (await _repositorio.ExisteCnpjAsync(cnpj.Valor, ct))
         {
-            Cnpj cnpj;
-            try
-            {
-                cnpj = Cnpj.Criar(comando.Cnpj);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-
-            if (await _repositorio.ExisteCnpjAsync(cnpj.Valor, ct))
-                throw new Exception("CNPJ Já Cadastrado");
-
-            Cliente cliente;
-            try
-            {
-                cliente = new Cliente(Guid.NewGuid(), comando.NomeFantasia, cnpj, comando.Ativo);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-
-            await _repositorio.AdicionarAsync(cliente, ct);
-            await _uow.CommitAsync(ct);
-
-            return cliente.Id;
+            _logger.LogWarning("Tentativa de cadastrar CNPJ duplicado: {Cnpj}", cnpj.Valor);
+            throw new CnpjDuplicadoException(cnpj.Valor);
         }
+
+        var cliente = new Cliente(
+            Guid.NewGuid(),
+            comando.NomeFantasia,
+            cnpj,
+            comando.Ativo);
+
+        await _repositorio.AdicionarAsync(cliente, ct);
+        await _uow.CommitAsync(ct);
+
+        _logger.LogInformation(
+            "Cliente criado com sucesso. Id: {ClienteId}, CNPJ: {Cnpj}", 
+            cliente.Id, 
+            cnpj.Valor);
+
+        return cliente.Id;
     }
 }

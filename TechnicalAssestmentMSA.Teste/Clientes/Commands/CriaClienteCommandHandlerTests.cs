@@ -1,8 +1,9 @@
+using Microsoft.Extensions.Logging;
 using Moq;
 using TechnicalAssestmentMSA.Application.Clientes.Commands;
 using TechnicalAssestmentMSA.Application.Repositories;
 using TechnicalAssestmentMSA.Domain.Entidades;
-using TechnicalAssestmentMSA.Domain.ValueObjects;
+using TechnicalAssestmentMSA.Domain.Exceptions;
 
 namespace TechnicalAssestmentMSA.Teste.Clientes.Commands
 {
@@ -10,13 +11,15 @@ namespace TechnicalAssestmentMSA.Teste.Clientes.Commands
     {
         private readonly Mock<IClienteRepository> _repositorioMock;
         private readonly Mock<IUnitOfWorkRepository> _uowMock;
+        private readonly Mock<ILogger<CriaClienteCommandHandler>> _loggerMock;
         private readonly CriaClienteCommandHandler _handler;
 
         public CriaClienteCommandHandlerTests()
         {
             _repositorioMock = new Mock<IClienteRepository>();
             _uowMock = new Mock<IUnitOfWorkRepository>();
-            _handler = new CriaClienteCommandHandler(_repositorioMock.Object, _uowMock.Object);
+            _loggerMock = new Mock<ILogger<CriaClienteCommandHandler>>();
+            _handler = new CriaClienteCommandHandler(_repositorioMock.Object, _uowMock.Object, _loggerMock.Object);
         }
 
         [Fact]
@@ -45,10 +48,10 @@ namespace TechnicalAssestmentMSA.Teste.Clientes.Commands
                 .ReturnsAsync(true);
 
             // Act & Assert
-            var excecao = await Assert.ThrowsAsync<Exception>(() => 
-                _handler.Handle(comando, CancellationToken.None));
+            var excecao = await Assert.ThrowsAsync<CnpjDuplicadoException>(() => 
+            _handler.Handle(comando, CancellationToken.None));
+            Assert.Contains(comando.Cnpj, excecao.Message);
             
-            Assert.Equal("CNPJ Já Cadastrado", excecao.Message);
             _repositorioMock.Verify(r => r.AdicionarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
             _uowMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -95,10 +98,10 @@ namespace TechnicalAssestmentMSA.Teste.Clientes.Commands
                 .ReturnsAsync(false);
 
             // Act & Assert
-            var excecao = await Assert.ThrowsAsync<Exception>(() => 
-                _handler.Handle(comando, CancellationToken.None));
-            
-            Assert.Contains("CNPJ inválido", excecao.Message);
+            var excecao = await Assert.ThrowsAsync<CnpjInvalidoException>(() =>
+                        _handler.Handle(comando, CancellationToken.None));
+            Assert.Contains(comando.Cnpj, excecao.Message);
+
             _repositorioMock.Verify(r => r.AdicionarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
             _uowMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -112,11 +115,12 @@ namespace TechnicalAssestmentMSA.Teste.Clientes.Commands
                 .ReturnsAsync(false);
 
             // Act & Assert
-            var excecao = await Assert.ThrowsAsync<Exception>(() => 
-                _handler.Handle(comando, CancellationToken.None));
-            
-            Assert.Contains("CNPJ inválido", excecao.Message);
+            var excecao = await Assert.ThrowsAsync<CnpjInvalidoException>(() =>
+                                   _handler.Handle(comando, CancellationToken.None));
+            Assert.Contains(comando.Cnpj, excecao.Message);
+
             _repositorioMock.Verify(r => r.AdicionarAsync(It.IsAny<Cliente>(), It.IsAny<CancellationToken>()), Times.Never);
+            _uowMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
